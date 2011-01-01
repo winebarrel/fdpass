@@ -1,0 +1,35 @@
+= Libarchive/Ruby
+
+== Description
+
+This is a library to transmit the file descriptor between the processes. 
+
+== Example
+=== Server (Reciever)
+  require 'fdpass'
+  
+  begin
+    fdpass = FDPass.server('/tmp/fdpass.sock')
+  
+    t = Thread.fork {
+      loop do
+        fd = fdpass.recv
+        io = IO.open(fd)
+        io.puts('%s: %s' % [fd, __FILE__])
+      end
+    }
+
+    t.join
+  ensure
+    fdpass.close
+  end
+
+== Client (Sender)
+  require 'fdpass'
+  
+  begin
+    fdpass = FDPass.client('/tmp/fdpass.sock')
+    fdpass.send($stderr.fileno)
+  ensure
+    fdpass.close if fdpass.closed?
+  end
