@@ -4,6 +4,10 @@
 
 This is a library to transmit the file descriptor between the processes. 
 
+== Install
+
+gem install fdpass
+
 == Example
 === Server (Reciever)
   require 'fdpass'
