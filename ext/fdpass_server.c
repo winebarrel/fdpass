@@ -98,6 +98,15 @@ static VALUE rd_fdpass_server_initialize(VALUE self, VALUE path) {
   return Qnil;
 }
 
+static VALUE rd_fdpass_server_fd_close(VALUE self) {
+  int ifd;
+
+  ifd = NUM2INT(self);
+  close(ifd);
+
+  return Qnil;
+}
+
 static VALUE rb_fdpass_server_recv(VALUE self) {
   struct fdpass_socket *p;
   struct msghdr msg = { 0 };
@@ -106,6 +115,7 @@ static VALUE rb_fdpass_server_recv(VALUE self) {
   int *cmsg_data;
   struct iovec iov;
   char iov_data[1];
+  VALUE fd;
 
   Data_Get_Struct(self, struct fdpass_socket, p);
   Check_Socket(p);
@@ -127,7 +137,10 @@ static VALUE rb_fdpass_server_recv(VALUE self) {
   cmsg = CMSG_FIRSTHDR(&msg);
   cmsg_data = (int *) CMSG_DATA(cmsg);
 
-  return INT2NUM(*cmsg_data);
+  fd = INT2NUM(*cmsg_data);
+  rb_define_singleton_method(fd, "close", rd_fdpass_server_fd_close, 0);
+
+  return fd;
 }
 
 void Init_fdpass_server() {
