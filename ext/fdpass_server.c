@@ -98,10 +98,10 @@ static VALUE rd_fdpass_server_initialize(VALUE self, VALUE path) {
   return Qnil;
 }
 
-static VALUE rd_fdpass_server_fd_close(VALUE self) {
+static VALUE rd_fdpass_server_fd_close(VALUE fd) {
   int ifd;
 
-  ifd = NUM2INT(self);
+  ifd = NUM2INT(fd);
   close(ifd);
 
   return Qnil;
