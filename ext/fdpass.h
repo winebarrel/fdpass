@@ -20,6 +20,19 @@
 #define RSTRING_LEN(s) (RSTRING(s)->len)
 #endif
 
+struct fdpass_socket {
+  int sock;
+  int closed;
+  VALUE path;
+};
+
+#define Check_Socket(p) do { \
+  if ((p)->sock < 0 || (p)->closed || NIL_P((p)->path)) { \
+    rb_raise(rb_eFDPassError, "Invalid socket"); \
+  } \
+  Check_Type((p)->path, T_STRING); \
+} while(0)
+
 void Init_fdpass_server();
 void Init_fdpass_client();
 

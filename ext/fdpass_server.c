@@ -1,9 +1,69 @@
 #include "fdpass.h"
-#include "fdpass_socket.h"
 
 extern VALUE rb_mFDPass;
 extern VALUE rb_eFDPassError;
 VALUE rb_cFDPassServer;
+
+static void unlink_socket(struct fdpass_socket *p) {
+#ifdef S_ISSOCK
+  char *cpath;
+  struct stat st;
+
+  if (NIL_P(p->path)) {
+    return;
+  }
+
+  Check_Type(p->path, T_STRING);
+  cpath = RSTRING_PTR(p->path);
+
+  if (stat(cpath, &st) == 0 && S_ISSOCK(st.st_mode)) {
+    unlink(cpath);
+  }
+#endif
+}
+
+static void fdpass_server_mark(struct fdpass_socket *p) {
+  rb_gc_mark(p->path);
+}
+
+static void fdpass_server_free(struct fdpass_socket *p) {
+  if (!p->closed) {
+    close(p->sock);
+    unlink_socket(p);
+  }
+
+  xfree(p);
+}
+
+static VALUE fdpass_server_alloc(VALUE klass) {
+  struct fdpass_socket *p = ALLOC(struct fdpass_socket);
+  p->sock = -1;
+  p->closed = 1;
+  p->path = Qnil;
+  return Data_Wrap_Struct(klass, fdpass_server_mark, fdpass_server_free, p);
+}
+
+static VALUE rd_fdpass_server_close(VALUE self) {
+  struct fdpass_socket *p;
+
+  Data_Get_Struct(self, struct fdpass_socket, p);
+
+  if (!p->closed) {
+    close(p->sock);
+    unlink_socket(p);
+    p->sock = -1;
+    p->closed = 1;
+    p->path = Qnil;
+  }
+
+  return Qnil;
+}
+
+static VALUE rd_fdpass_server_is_closed(VALUE self) {
+  struct fdpass_socket *p;
+  Data_Get_Struct(self, struct fdpass_socket, p);
+  return p->closed ? Qtrue : Qfalse;
+}
 
 static VALUE rd_fdpass_server_initialize(VALUE self, VALUE path) {
   struct fdpass_socket *p;
@@ -34,7 +94,6 @@ static VALUE rd_fdpass_server_initialize(VALUE self, VALUE path) {
   p->sock = sock;
   p->closed = 0;
   p->path = path;
-  p->is_server = 1;
 
   return Qnil;
 }
@@ -73,9 +132,9 @@ static VALUE rb_fdpass_server_recv(VALUE self) {
 
 void Init_fdpass_server() {
   rb_cFDPassServer = rb_define_class_under(rb_mFDPass, "Server", rb_cObject);
-  rb_define_alloc_func(rb_cFDPassServer, fdpass_socket_alloc);
+  rb_define_alloc_func(rb_cFDPassServer, fdpass_server_alloc);
   rb_define_private_method(rb_cFDPassServer, "initialize", rd_fdpass_server_initialize, 1);
-  rb_define_method(rb_cFDPassServer, "close", rd_fdpass_socket_close, 0);
-  rb_define_method(rb_cFDPassServer, "closed?", rd_fdpass_socket_is_closed, 0);
+  rb_define_method(rb_cFDPassServer, "close", rd_fdpass_server_close, 0);
+  rb_define_method(rb_cFDPassServer, "closed?", rd_fdpass_server_is_closed, 0);
   rb_define_method(rb_cFDPassServer, "recv", rb_fdpass_server_recv, 0);
 }
