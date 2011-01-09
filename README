@@ -20,7 +20,7 @@ gem install fdpass
         fd = fdpass.recv
         io = IO.open(fd)
         io.puts('%s: %s' % [fd, __FILE__])
-        FDPass.close_fd(fd)
+        fd.close
       end
     }
 
