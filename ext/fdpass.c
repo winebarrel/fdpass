@@ -32,4 +32,5 @@ void Init_fdpass() {
 
   Init_fdpass_server();
   Init_fdpass_client();
+  Init_fdpass_fd();
 }

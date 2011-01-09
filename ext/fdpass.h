@@ -26,6 +26,11 @@ struct fdpass_socket {
   VALUE path;
 };
 
+struct fdpass_fd {
+  int fd;
+  int closed;
+};
+
 #define Check_Socket(p) do { \
   if ((p)->sock < 0 || (p)->closed || NIL_P((p)->path)) { \
     rb_raise(rb_eFDPassError, "Invalid socket"); \
@@ -35,5 +40,6 @@ struct fdpass_socket {
 
 void Init_fdpass_server();
 void Init_fdpass_client();
+void Init_fdpass_fd();
 
 #endif // __FDPASS_H__
