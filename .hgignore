@@ -1,0 +1,5 @@
+syntax: glob
+*.gem
+ext/Makefile
+ext/*.o
+ext/*.so
