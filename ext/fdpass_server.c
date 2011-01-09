@@ -2,6 +2,7 @@
 
 extern VALUE rb_mFDPass;
 extern VALUE rb_eFDPassError;
+extern VALUE rb_cFDPassFD;
 VALUE rb_cFDPassServer;
 
 static void unlink_socket(struct fdpass_socket *p) {
@@ -106,6 +107,7 @@ static VALUE rb_fdpass_server_recv(VALUE self) {
   int *cmsg_data;
   struct iovec iov;
   char iov_data[1];
+  VALUE fd;
 
   Data_Get_Struct(self, struct fdpass_socket, p);
   Check_Socket(p);
@@ -127,7 +129,8 @@ static VALUE rb_fdpass_server_recv(VALUE self) {
   cmsg = CMSG_FIRSTHDR(&msg);
   cmsg_data = (int *) CMSG_DATA(cmsg);
 
-  return INT2NUM(*cmsg_data);
+  fd = INT2NUM(*cmsg_data);
+  return rb_class_new_instance(1, &fd, rb_cFDPassFD);
 }
 
 void Init_fdpass_server() {
