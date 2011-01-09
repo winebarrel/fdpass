@@ -81,5 +81,6 @@ void Init_fdpass_fd() {
   rb_define_method(rb_cFDPassFD, "close", rd_fdpass_fd_close, 0);
   rb_define_method(rb_cFDPassFD, "closed?", rd_fdpass_fd_is_closed, 0);
   rb_define_method(rb_cFDPassFD, "to_int", rd_fdpass_fd_to_int, 0);
+  rb_define_method(rb_cFDPassFD, "to_i", rd_fdpass_fd_to_int, 0);
   rb_define_method(rb_cFDPassFD, "to_s", rd_fdpass_fd_to_s, 0);
 }
