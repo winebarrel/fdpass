@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name              = 'fdpass'
-  spec.version           = '0.1.1'
+  spec.version           = '0.1.2'
   spec.summary           = 'This is a library to transmit the file descriptor between the processes.'
   spec.files             = Dir.glob('ext/*.{c,h}') + %w(ext/extconf.rb README)
   spec.author            = 'winebarrel'
