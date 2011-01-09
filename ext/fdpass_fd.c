@@ -44,6 +44,25 @@ static VALUE rd_fdpass_fd_to_int(VALUE self) {
   return INT2FIX(p->fd);
 }
 
+static VALUE rd_fdpass_fd_to_s(VALUE self) {
+  struct fdpass_fd *p;
+  VALUE str;
+  size_t len;
+  const char *cname;
+  char *cstr;
+
+  Data_Get_Struct(self, struct fdpass_fd, p);
+
+  cname = rb_obj_classname(self);
+  len = strlen(cname) + 6 + 16 + 25;
+  str = rb_str_new(0, len - 1);
+  cstr = RSTRING_PTR(str);
+  snprintf(cstr, len, "#<%s:0x%lx @fd=%d>", cname, self, p->fd);
+  RSTRING_LEN(str) = strlen(cstr);
+
+  return str;
+}
+
 static VALUE rd_fdpass_fd_initialize(VALUE self, VALUE fd) {
   struct fdpass_fd *p;
 
@@ -62,4 +81,5 @@ void Init_fdpass_fd() {
   rb_define_method(rb_cFDPassFD, "close", rd_fdpass_fd_close, 0);
   rb_define_method(rb_cFDPassFD, "closed?", rd_fdpass_fd_is_closed, 0);
   rb_define_method(rb_cFDPassFD, "to_int", rd_fdpass_fd_to_int, 0);
+  rb_define_method(rb_cFDPassFD, "to_s", rd_fdpass_fd_to_s, 0);
 }
